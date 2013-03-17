@@ -104,9 +104,8 @@ public class MITMAdminClient
     public void run() 
     {
 	try {
-	    if( m_remoteSocket != null ) {
-		PrintWriter writer =
-		    new PrintWriter( m_remoteSocket.getOutputStream() );
+	    if (m_remoteSocket != null) {
+		PrintWriter writer = new PrintWriter(m_remoteSocket.getOutputStream() );
 		writer.println("password:"+password);
 		writer.println("command:"+command);
 		writer.println("CN:"+commonName);

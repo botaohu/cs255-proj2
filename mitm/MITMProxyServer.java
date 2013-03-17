@@ -4,7 +4,11 @@
 
 package mitm;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 /**
@@ -88,7 +92,20 @@ public class MITMProxyServer
 		} else if (args[i].equals("-timeout")) {
 		    timeout = Integer.parseInt(args[++i]) * 1000;
 		} else if( args[i].equals("-pwdFile")) {
-			i++; // TODO(cs255): parse this as needed
+			// begin Borui Wang implementation
+			// TODO(cs255): parse this as needed 
+			try {
+				FileInputStream fstream = new FileInputStream(args[++i]);
+				DataInputStream in = new DataInputStream(fstream);
+				BufferedReader br = new BufferedReader(new InputStreamReader(in));
+				String strLine = br.readLine(); // read one line only
+				MITMServerInfo.admin_key_info = strLine;
+				in.close();
+			} catch (Exception e) {
+				System.err.println("\n" + "Error: " + e.getMessage());
+			}
+			// end Borui Wang implementation
+
 		} else if (args[i].equals("-adminPort")) {
 			adminPort = Integer.parseInt(args[++i]);
 		} else if (args[i].equals("-outputFile")) {

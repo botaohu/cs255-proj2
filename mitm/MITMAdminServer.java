@@ -51,18 +51,33 @@ class MITMAdminServer implements Runnable
 		// parse username and pwd
 		if (userPwdMatcher.find()) {
 		    String password = userPwdMatcher.group(1);
-
+		    //begin Borui Wang implementation
 		    // TODO(cs255): authenticate the user
-
-		    boolean authenticated = true;
-
-		    // if authenticated, do the command
-		    if( authenticated ) {
-			String command = userPwdMatcher.group(2);
-			String commonName = userPwdMatcher.group(3);
-
-			doCommand( command );
-		    }
+		    // System.out.println(password);
+		    
+		    try {
+				String strLine = MITMServerInfo.admin_key_info;
+				// System.out.println(strLine);
+				String hash_salt = strLine.split(" ")[0];
+				String hash_value = strLine.split(" ")[1];
+			    String hash_verify = BCrypt.hashpw(password, hash_salt);
+				// System.out.println("PWD salt:"+hash_salt);
+				// System.out.println("PWD hash value:"+hash_value);
+			    // System.out.println("PWD hash verify:"+hash_verify);
+			    // if authenticated, do the command
+			    if( hash_value.equals(hash_verify) ) {
+					String command = userPwdMatcher.group(2);
+					String commonName = userPwdMatcher.group(3);
+					doCommand( command );
+			    }else{
+			    	sendString("Invalid password");
+			    	m_socket.close();
+			    }
+			    
+			} catch (Exception e) {
+				System.err.println("\n" + "Error: " + e.getMessage());
+			}
+		    //end Borui Wang implementation
 		}	
 	    }
 	    catch( InterruptedIOException e ) {
@@ -80,13 +95,20 @@ class MITMAdminServer implements Runnable
     }
     
     private void doCommand( String cmd ) throws IOException {
-
+    // begin Borui Wang implementation
 	// TODO(cs255): instead of greeting admin client, run the indicated command
-
-	sendString("How are you Admin Client !!");
-
-	m_socket.close();
-	
+    if(cmd.equals("shutdown")){
+    	sendString("Shutting down server..");
+    	m_socket.close();
+    	System.exit(0);
+    }else if(cmd.equals("stats")){
+    	sendString("Proxy server has received such number of requests: "+String.valueOf(MITMServerInfo.proxy_count));
+    	m_socket.close();
+    }else{
+    	sendString("How are you Admin Client ! You have not issued a command, I don't know what to do!");
+    	m_socket.close();
+    }
+	//end Borui Wang implementation
     }
 
 }

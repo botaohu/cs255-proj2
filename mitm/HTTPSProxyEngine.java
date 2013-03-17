@@ -14,6 +14,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.security.Principal;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -151,16 +153,24 @@ public class HTTPSProxyEngine extends ProxyEngine
 			sendClientResponse(localSocket.getOutputStream(),"504 Gateway Timeout",remoteHost,remotePort);
 			continue;
 		    }
-
+		    
+		    // begin Borui Wang implementation
 		    // TODO(cs255): get the remote server's Distinguished Name (DN) and serial number from its actual certificate,
 		    //   so that we can copy those values in the certificate that we forge.
 		    //   (Recall that we, as a MITM, obtain the server's actual certificate from our own session as a client
-		    //    to that server.)
-		    javax.security.cert.X509Certificate[] serverCertChain = null;
-		    iaik.x509.X509Certificate serverCertificate = null;
-		    Principal serverDN = null;
-		    BigInteger serverSerialNumber = null;
-
+		    //    to that server.)			
+		    // remoteSocket.startHandshake(); // never start the handshake!
+		    SSLSession session = remoteSocket.getSession();
+			java.security.cert.Certificate[] servercerts = session.getPeerCertificates();		
+		    //javax.security.cert.X509Certificate[] serverCertChain = null;
+		    // its also possible to use home cooked regular expression "CN=.+," to find out DN - borui
+		    iaik.x509.X509Certificate serverCertificate = new
+		    		iaik.x509.X509Certificate(servercerts[0].getEncoded());
+		    Principal serverDN = serverCertificate.getSubjectDN();
+		    BigInteger serverSerialNumber = serverCertificate.getSerialNumber();
+		    // System.out.println(serverDN);
+		    // System.out.println(serverSerialNumber);
+		    // end Borui Wang implementation
 
 		    //We've already opened the socket, so might as well keep using it:
 		    m_proxySSLEngine.setRemoteSocket(remoteSocket);

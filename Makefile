@@ -17,6 +17,8 @@ JAVASRCS        = \
 			mitm/StreamThread.java \
 			mitm/MITMAdminClient.java \
 			mitm/MITMAdminServer.java \
+			mitm/BCrypt.java \
+			mitm/MITMServerInfo.java \
 
 JAVAOBJS        = $(JAVASRCS:.java=.class)
 
